@@ -35,6 +35,8 @@ ShellRoot {
     }
     var glyph = visibleText(item)
     check(glyph !== null, "monitor glyph is missing")
+    monitorMetrics.font = glyph.font
+    monitorMetrics.text = glyph.text
     var ink = monitorMetrics.tightBoundingRect
     return glyph.mapToItem(button, ink.x, glyph.baselineOffset + ink.y, ink.width, ink.height)
   }
@@ -55,6 +57,9 @@ ShellRoot {
     var button = find(widget, "tooltipText")
     var expected = glyphBounds(reference, reference)
     var actual = glyphBounds(button, button)
+    var smaller = glyphBounds(smallerFontSample, smallerFontSample)
+    check(Math.abs(smaller.width - expected.width) > 0.05,
+      "measurement failed to detect a smaller glyph font")
     check(Math.abs(actual.width - expected.width) < 0.05,
       "monitor width " + actual.width + " differs from stock " + expected.width)
     check(Math.abs(actual.height - expected.height) < 0.05,
@@ -154,9 +159,6 @@ ShellRoot {
 
   TextMetrics {
     id: monitorMetrics
-    text: reference.text
-    font.family: reference.fontFamily
-    font.pixelSize: reference.fontSize
   }
   TextMetrics {
     id: badgeMetrics
@@ -185,6 +187,15 @@ ShellRoot {
     implicitWidth: 240
     implicitHeight: 100
     color: Commons.Color.background
+    Item {
+      id: smallerFontSample
+      opacity: 0
+      Text {
+        text: reference.text
+        font.family: reference.fontFamily
+        font.pixelSize: Math.max(1, reference.fontSize - 4)
+      }
+    }
     Row {
       spacing: 20
       BarIconButton {
